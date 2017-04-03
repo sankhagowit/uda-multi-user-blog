@@ -17,8 +17,10 @@
 import webapp2
 import os
 import jinja2
+import user_accounts
 
 # Create Template directory path, Initialize Jinja, set autoescape to true
+
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir),
                                autoescape=True)
@@ -38,6 +40,14 @@ class Handler(webapp2.RequestHandler):
 class MainHandler(Handler):
     def get(self):
         self.response.write('Hello world!')
+        user_cookie_str = self.request.cookies.get('user')
+        if user_cookie_str:
+            user_val = user_accounts.check_secure_val(user_cookie_str)
+            # Load page as signed in user
+        else:
+            pass # Load page as unregisted user
+
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
