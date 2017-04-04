@@ -13,3 +13,9 @@ class Users(db.Model):
     # email = db.StringProperty(required = True)
     password = db.StringProperty(required=True)
     created = db.DateTimeProperty(auto_now_add = True)
+
+class Blog(db.Model):
+    """
+    Explain the blog class/entity
+    """
+    created = db.DateTimeProperty(auto_now_add = True)
