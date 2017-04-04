@@ -6,21 +6,38 @@
     <meta http-equiv="X-UA-Compatible" content="ie-edge">
 
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
-    <title>Title</title>
+    <title>{{title}}</title>
 </head>
 <body>
     <div class="container">
         <header class="row">
-            <h1>Multi-User Blog</h1>
+            <h1 class="text-center">Multi-User Blog</h1>
         </header>
         <div class="row">
-            <main class="col-sm-9">
+            <main class="col-sm-9 text-center">
                 Blog Stuff Here
                 {% block content %}
                 {% endblock %}
             </main>
             <aside class="col-sm-3">
                 Login / Logout User Bar
+                <form action="" method="post">
+                    <label for="">
+                        <div>Username</div>
+                        <input type="text" name="username"
+                           value="{{username}}">
+                    </label>
+                    <label for="">
+                        <div>Password</div>
+                        <input type="password" name="password">
+                    </label>
+                    <label for="">Remember Me
+                        <input type="checkbox" name="member">
+                    </label>
+                    <a href="/signup">Sign Up</a>
+                    <div class="error">{{error}}</div>
+                    <input type="submit">
+                </form>
             </aside>
         </div>
     </div>
