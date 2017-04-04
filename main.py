@@ -39,7 +39,7 @@ class Handler(webapp2.RequestHandler):
 
 class MainHandler(Handler):
     def get(self):
-        self.response.write('Hello world!')
+        self.render("base.html")
         user_cookie_str = self.request.cookies.get('user')
         if user_cookie_str:
             user_val = user_accounts.check_secure_val(user_cookie_str)

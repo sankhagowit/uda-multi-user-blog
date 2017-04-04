@@ -4,9 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie-edge">
+
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
     <title>Title</title>
 </head>
 <body>
-    
+    <div class="container">
+        <header class="row">
+            <h1>Multi-User Blog</h1>
+        </header>
+        <div class="row">
+            <main class="col-sm-9">
+                Blog Stuff Here
+                {% block content %}
+                {% endblock %}
+            </main>
+            <aside class="col-sm-3">
+                Login / Logout User Bar
+            </aside>
+        </div>
+    </div>
+    <script src="/jquery/jquery.min.js"></script>
 </body>
 </html>

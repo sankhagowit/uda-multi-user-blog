@@ -9,6 +9,12 @@ handlers:
   static_files: favicon.ico
   upload: favicon\.ico
 
+- url: /jquery
+  static_dir: bower_components/jquery/dist
+
+- url: /bootstrap
+  static_dir: bower_components/bootstrap/dist
+
 - url: .*
   script: main.app
 
