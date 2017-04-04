@@ -39,7 +39,7 @@ class Handler(webapp2.RequestHandler):
 
 class MainHandler(Handler):
     def get(self):
-        self.render("base.html")
+        self.render("base.html", title="Blog Home")
         user_cookie_str = self.request.cookies.get('user')
         if user_cookie_str:
             user_val = user_accounts.check_secure_val(user_cookie_str)
@@ -47,8 +47,11 @@ class MainHandler(Handler):
         else:
             pass # Load page as unregisted user
 
-
+class SignUp(Handler):
+    def get(self):
+        self.render('signup.html')
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
-], debug=True)
+    ('/', MainHandler),
+    ('/signup', SignUp)
+    ], debug=True)

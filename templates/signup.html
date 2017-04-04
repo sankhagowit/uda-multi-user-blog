@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post" class="left">
+    <label for="">
+        Email Address <input type="text" name="email" value="{{email}}">
+    </label><br>
+    <label for="">
+        Username <input type="text" name="username" value="{{username}}">
+    </label><br>
+    <label for="">
+        Password <input type="text" name="password">
+    </label><br>
+    <label for="">
+        Repeat Password <input type="text" name="passwordCheck">
+    </label>
+    <p class="error">{{error}}</p>
+    <input type="submit">
+</form>
+{% endblock %}
