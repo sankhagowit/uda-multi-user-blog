@@ -15,6 +15,9 @@ handlers:
 - url: /bootstrap
   static_dir: bower_components/bootstrap/dist
 
+- url: /css
+  static_dir: css
+
 - url: .*
   script: main.app
 
