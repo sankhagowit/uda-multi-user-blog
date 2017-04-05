@@ -47,11 +47,22 @@ class MainHandler(Handler):
         else:
             pass # Load page as unregisted user
 
+    def post(self):
+        self.write('MainHandler Post Method Called')
+
 class SignUp(Handler):
     def get(self):
         self.render('signup.html', title="Multi-User Blog Registration")
 
+    def post(self):
+        self.write('SignUp Post Method Called')
+
+class Login(Handler):
+    def post(self):
+        self.write('Login Called')
+
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
-    ('/signup', SignUp)
+    ('/signup', SignUp),
+    ('/login', Login)
     ], debug=True)
