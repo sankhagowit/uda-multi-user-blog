@@ -38,10 +38,17 @@ class Handler(webapp2.RequestHandler):
         return t.render(params)
 
     def render(self, template, **kw):
-        if self.user:
-            self.write(self.render_str(template, user=self.user, **kw))
+        if self.posts:
+            if self.user:
+                self.write(self.render_str(template, user=self.user,
+                                           posts=self.posts, **kw))
+            else:
+                self.write(self.render_str(template, posts=self.posts, **kw))
         else:
-            self.write(self.render_str(template, **kw))
+            if self.user:
+                self.write(self.render_str(template, user=self.user, **kw))
+            else:
+                self.write(self.render_str(template, **kw))
 
     def set_cookie(self, name, val):
         # Create secure cookie, deletes when browser closes
@@ -68,7 +75,9 @@ class Handler(webapp2.RequestHandler):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         user_id = self.read_cookie('user_id')
         self.user = user_id and model.User.by_id(int(user_id))
-        # Check for comments
+        posts = model.BlogPost.all().order('-created')
+        if posts:
+            self.posts = posts
 
 
 class MainHandler(Handler):
@@ -171,7 +180,8 @@ class BlogPost(Handler):
             # They got a separate handler for this
         else:
             error = "Please enter a Subject and Content for the Blog Post"
-            self.render('blogPost.html', title="New Blog Post", postError=error)
+            self.render('blogPost.html', title="New Blog Post", postError=error,
+                        subject = subject, content = content)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),

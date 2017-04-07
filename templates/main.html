@@ -1,5 +1,10 @@
 {% extends "baseOut.html" %}
 
 {% block content %}
-
+    {% for p in posts %}
+        <h4>{{p.subject}}</h4>
+        <hr>
+        <p>{{p.content}}</p>
+        <br><br>
+    {% endfor %}
 {% endblock %}
