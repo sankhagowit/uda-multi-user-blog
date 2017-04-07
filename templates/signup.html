@@ -1,7 +1,8 @@
 {% extends "baseOut.html" %}
 
 {% block content %}
-<form action="" method="post" class="left">
+<h2>Blog Registration</h2>
+<form action="" method="post">
     <label for="">
         Email Address <input type="text" name="email" value="{{email}}">
     </label><br>
@@ -17,4 +18,31 @@
     <p class="error">{{error}}</p>
     <input type="submit">
 </form>
+
+<form action="" method="post">
+    <table class="">
+        <tr>
+            <td class="label">Email Address</td>
+            <td><input type="text" name="email" value="{{email}}"></td>
+            <td class="error">{{emailError}}</td>
+        </tr>
+        <tr>
+            <td class="label">User Name</td>
+            <td><input type="text" name="username" value="{{username}}"></td>
+            <td class="error">{{usernameError}}</td>
+        </tr>
+        <tr>
+            <td class="label">Password</td>
+            <td><input type="text" name="password"></td>
+            <td class="error">{{passwordError}}</td>
+        </tr>
+        <tr>
+            <td class="label">Verify Password</td>
+            <td><input type="text" name="passwordCheck"></td>
+            <td class="error">{{passwordCheckError}}</td>
+        </tr>
+    </table>
+    <input type="submit">
+</form>
 {% endblock %}
+

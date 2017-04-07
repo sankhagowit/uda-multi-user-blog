@@ -56,7 +56,7 @@ class Handler(webapp2.RequestHandler):
 
     def logout(self):
         # Delete the cookie for a logged in user
-        self.response.headers.add_headers('Set Cookie', 'user_id=; Path=/')
+        self.response.delete_cookie('user_id')
 
     def initialize(self, *a, **kw):
         # Check if user is logged in at every request
@@ -64,31 +64,80 @@ class Handler(webapp2.RequestHandler):
         user_id = self.read_cookie('user_id')
         self.user = user_id and model.User.by_id(int(user_id)) #TODO understand
 
+
 class MainHandler(Handler):
     def get(self):
-        self.render("main.html", title="Multi-User Blog")
-        user_cookie_str = self.request.cookies.get('user')
-        if user_cookie_str:
-            user_val = user_accounts.check_secure_val(user_cookie_str)
-            # Load page as signed in user
+        if self.user:
+            self.render("main.html", title="Multi-User Blog", user=self.user)
         else:
-            pass # Load page as unregisted user
+            self.render("main.html", title="Multi-User Blog")
 
     def post(self):
         self.write('MainHandler Post Method Called')
 
 
 class SignUp(Handler):
+    """Handle Registration
+    Display signup page, then check the inputs for valid characters
+    pass all error messages into reg_parms and then reload the page
+    If inputs pass all input checks, check database is username is available
+    if username is available, add user to database, sign user in, reload page"""
     def get(self):
         self.render('signup.html', title="Multi-User Blog Registration")
 
     def post(self):
-        self.write('SignUp Post Method Called')
+        self.email = self.request.get('email')
+        self.username = self.request.get('username')
+        self.password = self.request.get('password')
+        self.passwordCheck = self.request.get('passwordCheck')
+
+        reg_params = dict(username = self.username, email = self.email)
+
+        if not user_accounts.valid_email(self.email):
+            reg_params['emailError'] = "Not a valid email address"
+
+        if not user_accounts.valid_username(self.username):
+            reg_params['usernameError'] = "Not a valid username, invalid characters"
+
+        if not user_accounts.valid_password(self.password):
+            reg_params['passwordError'] = "Not a valid password, invalid characters"
+
+        if self.password != self.passwordCheck:
+            reg_params['passwordCheckError'] = "Passwords do not match"
+
+        if len(reg_params)>2:
+            reg_params['title'] = "Registration Error"
+            self.render('signup.html', **reg_params)
+        else:
+            if model.User.by_name(self.username):
+                reg_params['usernameError'] = "Username already taken"
+                reg_params['title'] = "Registration Error"
+                self.render('signup.html', **reg_params)
+            else:
+                user = model.User.register(self.username, self.password, self.email)
+                user.put()
+                self.login(user)
+                self.redirect('/')
 
 
 class Login(Handler):
     def post(self):
-        self.write('Login Called')
+        username = self.request.get('username')
+        password = self.request.get('password')
+
+        user = model.User.login(username, password)
+        if user:
+            self.login(user)
+            self.redirect('/')
+        else:
+            error = 'Invalid Username or Password'
+            # TODO find way to just rerender the current URL with this error message?
+            self.redirect('signup.html')#, title="Login Error", loginError=error)
+
+class Logout(Handler):
+    def post(self):
+        self.logout()
+        self.redirect('/')
 
 class BlogPost(Handler):
     def get(self):
@@ -101,5 +150,6 @@ app = webapp2.WSGIApplication([
     ('/', MainHandler),
     ('/signup', SignUp),
     ('/login', Login),
-    ('/post', BlogPost)
+    ('/post', BlogPost),
+    ('/logout', Logout)
     ], debug=True)

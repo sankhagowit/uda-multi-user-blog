@@ -20,6 +20,13 @@
                 {% endblock %}
             </main>
             <aside class="col-sm-3">
+                {% if user %}
+                <h3>Welcome {{user.userName}}</h3>
+                <form action="/logout" method="post">
+                    <input type="submit" value="Logout">
+                </form>
+
+                {% else %}
                 Login / Logout User Bar
                 <form action="/login" method="post">
                     <label for="">
@@ -35,8 +42,9 @@
                         <input type="checkbox" name="member">
                     </label>
                     <a href="/signup">Sign Up</a>
-                    <div class="error">{{error}}</div>
+                    <div class="error">{{loginError}}</div>
                     <input type="submit">
+                {% endif %}
                 </form>
 
             </aside>
