@@ -17,6 +17,8 @@
 import webapp2
 import os
 import jinja2
+
+import model
 import user_accounts
 
 # Create Template directory path, Initialize Jinja, set autoescape to true
@@ -60,7 +62,7 @@ class Handler(webapp2.RequestHandler):
         # Check if user is logged in at every request
         webapp2.RequestHandler.initialize(self, *a, **kw)
         user_id = self.read_cookie('user_id')
-        self.user = user_id and User.by_id(int(user_id)) #TODO
+        self.user = user_id and model.User.by_id(int(user_id)) #TODO understand
 
 class MainHandler(Handler):
     def get(self):
