@@ -36,6 +36,31 @@ class Handler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
+    def set_cookie(self, name, val):
+        # Create secure cookie, deletes when browser closes
+        cookie_val = user_accounts.make_secure_val(val)
+        self.response.headers.add_header('Set-Cookie',
+                                         '%s=%s' % (name,cookie_val))
+
+    def read_cookie(self, name):
+        # First check if cookie exists then check if cookie passes
+        # security test
+        secure_cookie = self.request.cookies.get(name)
+        return secure_cookie and user_accounts.check_secure_val(secure_cookie)
+
+    def login(self, user):
+        # Set the cookie for a logged in user
+        self.set_cookie('user_id', str(user.key().id()))
+
+    def logout(self):
+        # Delete the cookie for a logged in user
+        self.response.headers.add_headers('Set Cookie', 'user_id=; Path=/')
+
+    def initialize(self, *a, **kw):
+        # Check if user is logged in at every request
+        webapp2.RequestHandler.initialize(self, *a, **kw)
+        user_id = self.read_cookie('user_id')
+        self.user = user_id and User.by_id(int(user_id)) #TODO
 
 class MainHandler(Handler):
     def get(self):
