@@ -21,8 +21,8 @@ def check_secure_val(h):
         return val
 
 # User Account Hashing
-def make_salt():
-    return ''.join(random.choice(string.letters) for x in xrange(5))
+def make_salt(length = 5):
+    return ''.join(random.choice(string.letters) for x in xrange(length))
 
 
 def make_pw_hash(name, pw, salt = None):
