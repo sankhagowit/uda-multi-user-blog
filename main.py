@@ -50,6 +50,7 @@ class MainHandler(Handler):
     def post(self):
         self.write('MainHandler Post Method Called')
 
+
 class SignUp(Handler):
     def get(self):
         self.render('signup.html', title="Multi-User Blog Registration")
@@ -57,12 +58,21 @@ class SignUp(Handler):
     def post(self):
         self.write('SignUp Post Method Called')
 
+
 class Login(Handler):
     def post(self):
         self.write('Login Called')
 
+class BlogPost(Handler):
+    def get(self):
+        self.render('blogPost.html', title="New Blog Post")
+
+    def post(self):
+        self.write('BlogPost Post method called')
+
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
     ('/signup', SignUp),
-    ('/login', Login)
+    ('/login', Login),
+    ('/post', BlogPost)
     ], debug=True)

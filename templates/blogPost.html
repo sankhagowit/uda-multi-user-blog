@@ -1,0 +1,17 @@
+{% extends "baseOut.html" %}
+
+{% block content %}
+<form action="" method="post">
+    <label for="">
+        <div>Subject</div>
+        <input type="text" name="subject" value="{{subject}}">
+    </label>
+    <br>
+    <label for="">
+        <div>Blog Post</div>
+        <textarea name="content" id="" cols="30" rows="10">{{content}}</textarea>
+    </label>
+    <div class="error">{{error}}</div>
+    <input type="submit">
+</form>
+{% endblock %}
