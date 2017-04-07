@@ -158,6 +158,20 @@ class BlogPost(Handler):
 
     def post(self):
         self.write('BlogPost Post method called')
+        subject = self.request.get('subject')
+        content = self.request.get('content')
+
+        if subject and content:
+            post = model.BlogPost(parent = model.blog_key(),
+                                  subject = subject,
+                                  content = content)
+            post.put()
+            self.redirect('/')
+            # self.redirect('/blog/%s' % str(p.key().id()))
+            # They got a separate handler for this
+        else:
+            error = "Please enter a Subject and Content for the Blog Post"
+            self.render('blogPost.html', title="New Blog Post", postError=error)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),

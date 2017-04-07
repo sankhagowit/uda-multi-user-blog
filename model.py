@@ -39,7 +39,11 @@ def users_key(group = 'default'):
     # group parameter for future user groups
     return db.Key.from_path('users', group)
 
-class Blog(db.Model):
+def blog_key(name = 'default'):
+    # group parameter for future blog groups
+    return db.Key.from_path('blogs', name)
+
+class BlogPost(db.Model):
     """
     Explain the blog class/entity
     """
