@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import urllib
+
 import webapp2
 import os
 import jinja2
@@ -36,7 +38,10 @@ class Handler(webapp2.RequestHandler):
         return t.render(params)
 
     def render(self, template, **kw):
-        self.write(self.render_str(template, **kw))
+        if self.user:
+            self.write(self.render_str(template, user=self.user, **kw))
+        else:
+            self.write(self.render_str(template, **kw))
 
     def set_cookie(self, name, val):
         # Create secure cookie, deletes when browser closes
@@ -62,16 +67,15 @@ class Handler(webapp2.RequestHandler):
         # Check if user is logged in at every request
         webapp2.RequestHandler.initialize(self, *a, **kw)
         user_id = self.read_cookie('user_id')
-        self.user = user_id and model.User.by_id(int(user_id)) #TODO understand
+        self.user = user_id and model.User.by_id(int(user_id))
+        # Check for comments
 
 
 class MainHandler(Handler):
     def get(self):
-        if self.user:
-            self.render("main.html", title="Multi-User Blog", user=self.user)
-        else:
-            self.render("main.html", title="Multi-User Blog")
+        self.render("main.html", title="Multi-User Blog")
 
+    # Post method for debug - nothing to really post here.
     def post(self):
         self.write('MainHandler Post Method Called')
 
@@ -83,7 +87,9 @@ class SignUp(Handler):
     If inputs pass all input checks, check database is username is available
     if username is available, add user to database, sign user in, reload page"""
     def get(self):
-        self.render('signup.html', title="Multi-User Blog Registration")
+        loginError = self.request.get('loginError')
+        self.render('signup.html', title="Multi-User Blog Registration",
+                    loginError=loginError)
 
     def post(self):
         self.email = self.request.get('email')
@@ -114,8 +120,11 @@ class SignUp(Handler):
                 reg_params['title'] = "Registration Error"
                 self.render('signup.html', **reg_params)
             else:
-                user = model.User.register(self.username, self.password, self.email)
+                user = model.User.register(self.username,
+                                           self.password,
+                                           self.email)
                 user.put()
+
                 self.login(user)
                 self.redirect('/')
 
@@ -130,9 +139,9 @@ class Login(Handler):
             self.login(user)
             self.redirect('/')
         else:
-            error = 'Invalid Username or Password'
+            query_params = {'loginError': 'Invalid Username or Password'}
             # TODO find way to just rerender the current URL with this error message?
-            self.redirect('signup.html')#, title="Login Error", loginError=error)
+            self.redirect('/signup?'+urllib.urlencode(query_params))
 
 class Logout(Handler):
     def post(self):
@@ -141,7 +150,11 @@ class Logout(Handler):
 
 class BlogPost(Handler):
     def get(self):
-        self.render('blogPost.html', title="New Blog Post")
+        if self.user:
+            self.render('blogPost.html', title="New Blog Post")
+        else:
+            query_params = {'loginError': 'Must be logged in to make a blog post'}
+            self.redirect('/signup?'+urllib.urlencode(query_params))
 
     def post(self):
         self.write('BlogPost Post method called')

@@ -22,9 +22,18 @@
             <aside class="col-sm-3">
                 {% if user %}
                 <h3>Welcome {{user.userName}}</h3>
+                <form action="/post">
+                    <input type="submit" value = "New Post">
+                </form>
+                <br>
+                <form action="/">
+                    <input type="submit" value = "Home">
+                </form>
+                <br>
                 <form action="/logout" method="post">
                     <input type="submit" value="Logout">
                 </form>
+                put a list here with blog posts?
 
                 {% else %}
                 Login / Logout User Bar
@@ -38,12 +47,12 @@
                         <div>Password</div>
                         <input type="password" name="password">
                     </label>
-                    <label for="">Remember Me
-                        <input type="checkbox" name="member">
-                    </label>
-                    <a href="/signup">Sign Up</a>
+                    <!--<label for="">Remember Me-->
+                        <!--<input type="checkbox" name="member">-->
+                    <!--</label>-->
                     <div class="error">{{loginError}}</div>
                     <input type="submit">
+                    <a href="/signup">Sign Up</a>
                 {% endif %}
                 </form>
 
