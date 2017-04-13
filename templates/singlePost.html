@@ -8,7 +8,13 @@
         <br>
         <em class="author">{{post.author}}</em>
         <i class="date">{{post.last_modified}}</i>
-        <!--<em>{{post.likes}}</em>-->
+        {% if post.comments > 0 %}
+        <em>Comments: {{post.comments}}</em>
+        {% endif %}
+
+        {% if post.likesLength() > 0 %}
+        <em>Likes: {{post.likesLength()}}</em>
+        {% endif %}
     </div>
     <br>
     <form action="" method="post">

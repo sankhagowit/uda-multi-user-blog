@@ -181,16 +181,32 @@ class BlogPost(Handler):
                         subject = subject, content = content)
 
 class PostPage(Handler):
-    """PostPage displays the view to make a new BlogPost or modify an existing 
-    BlogPost."""
+    """PostPage displays a single blog post at a time with the comments. From this page a user
+    can like a post or add a comment"""
     def get(self, post_id):
         # Pass Errors from incorrect users attempting to modify or comment a blog post
         # in the URI get parameters.
         modifyError = self.request.get('modifyError')
         commentError = self.request.get('commentError')
         post = model.BlogPost.get_by_id(int(post_id))
+        # TODO add a query collecting all of the comments for this blog post.
         self.render('singlePost.html', title="Blog Post Detail", post=post,
                     modifyError=modifyError, commentError=commentError)
+
+    def post(self, post_id):
+        # This post method is used for likes.
+        post = model.BlogPost.get_by_id(int(post_id))
+        if post.author != self.user.userName:
+            if post.likes != self.user.userName: #TODO this check isn't working.
+                post.addLike(self.user.userName)
+                commentError = None
+            else:
+                commentError = "You've already liked the post! Cannot like it again!"
+        else:
+            commentError = "You cannot like your own post!"
+
+        self.render('singlePost.html', title="Blog Post Detail", post=post,
+                    commentError=commentError)
 
 class ModifyBlog(Handler):
     def get(self, post_id):
@@ -217,9 +233,10 @@ class ModifyBlog(Handler):
         else:
             if delete:
                 post.delete()
+                #TODO Add a query of the comments for this blog post and delete all of the associated comments
                 query_params = {'message': "Blog Post Deleted. "
                                            "Page may need to be refreshed to reflect changes"}
-                self.redirect('/?%s' % urllib.urlencode(query_params))  # TODO this redirect is too fast, still shows
+                self.redirect('/?%s' % urllib.urlencode(query_params))
             else:
                 subject = self.request.get('subject')
                 content = self.request.get('content')
@@ -233,6 +250,9 @@ class ModifyBlog(Handler):
                     self.render('blogPost.html', title="Modify Blog Post", postError=error,
                                 subject=subject, content=content)
 
+class CommentBlog(Handler):
+    def get(self, post_id):
+        self.write('CommentBlog get method called.')
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
@@ -241,5 +261,6 @@ app = webapp2.WSGIApplication([
     ('/post', BlogPost),
     ('/logout', Logout),
     (r'/([0-9]+)', PostPage),
-    (r'/modify/([0-9]+)', ModifyBlog)
+    (r'/modify/([0-9]+)', ModifyBlog),
+    (r'/comment/([0-9]+)', CommentBlog)
     ], debug=True)

@@ -49,11 +49,24 @@ class BlogPost(db.Model):
     """
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
-    author = db.TextProperty(required = True)
+    author = db.StringProperty(required = True)
+    likes = db.StringListProperty()
+    comments = db.IntegerProperty(default=0)
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
+
+    def likesLength(self):
+        return len(self.likes)
+
+    def addLike(self, userName):
+        self.likes.append(userName)
+        self.put()
 
 class Comment(db.Model):
     """
     Explain the comment class/entity
     """
+    blogPost = db.IntegerProperty(required = True)
+    content = db.TextProperty(required = True)
+    author =  db.StringProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add=True)

@@ -9,7 +9,13 @@
             <br>
             <em class="author">{{p.author}}</em>
             <i class="date">{{p.last_modified}}</i>
-            <!--<em>Likes: {{p.likes}} Comments: {{p.comments}}</em>-->
+            {% if p.comments > 0 %}
+            <em><a href="/{{p.key().id()}}">Comments:</a> {{p.comments}}</em>
+            {% endif %}
+
+            {% if p.likesLength() > 0 %}
+                <em>Likes: {{p.likesLength()}}</em>
+            {% endif %}
         </div>
         <br><br>
     {% endfor %}
