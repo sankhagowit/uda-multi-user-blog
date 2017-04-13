@@ -154,7 +154,7 @@ class Login(Handler):
 class Logout(Handler):
     def post(self):
         self.logout()
-        self.redirect('/')
+        self.redirect('/signup')
 
 class BlogPost(Handler):
     def get(self):
@@ -184,7 +184,7 @@ class BlogPost(Handler):
 class PostPage(Handler):
     def get(self, post_id):
         post = model.BlogPost.get_by_id(int(post_id))
-        self.render('singlePost.html', title="Success!", post=post)
+        self.render('singlePost.html', title="Blog Post Detail", post=post)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
@@ -192,5 +192,6 @@ app = webapp2.WSGIApplication([
     ('/login', Login),
     ('/post', BlogPost),
     ('/logout', Logout),
-    (r'/([0-9]+)', PostPage)
+    (r'/([0-9]+)', PostPage),
+
     ], debug=True)

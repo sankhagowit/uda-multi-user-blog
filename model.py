@@ -2,10 +2,10 @@ from google.appengine.ext import db
 import user_accounts
 
 class User(db.Model):
-    """User Class is a Google app engine Entity database which stores the 
+    """User Class is db.Model Entity database which stores the 
     clear text user name, clear text date created, password of the form 
     hashed password,salt. The hashed password contains the 
-    username+password+salt
+    username+password+salt see user_accounts.py for more on hash
     """
     userName = db.StringProperty(required = True)
     email = db.StringProperty()
@@ -49,5 +49,11 @@ class BlogPost(db.Model):
     """
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
+    author = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
-    last_modified = db.DateTimeProperty(auto_now_add = True)
+    last_modified = db.DateTimeProperty(auto_now = True)
+
+class Comment(db.Model):
+    """
+    Explain the comment class/entity
+    """
