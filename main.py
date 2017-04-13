@@ -38,15 +38,16 @@ class Handler(webapp2.RequestHandler):
         return t.render(params)
 
     def render(self, template, **kw):
+        message = self.request.get('message')
         if self.posts:
             if self.user:
                 self.write(self.render_str(template, user=self.user,
-                                           posts=self.posts, **kw))
+                                           posts=self.posts, message=message, **kw))
             else:
                 self.write(self.render_str(template, posts=self.posts, **kw))
         else:
             if self.user:
-                self.write(self.render_str(template, user=self.user, **kw))
+                self.write(self.render_str(template, user=self.user, message=message, **kw))
             else:
                 self.write(self.render_str(template, **kw))
 
@@ -216,7 +217,9 @@ class ModifyBlog(Handler):
         else:
             if delete:
                 post.delete()
-                self.redirect('/')  # TODO this redirect is too fast, still shows
+                query_params = {'message': "Blog Post Deleted. "
+                                           "Page may need to be refreshed to reflect changes"}
+                self.redirect('/?%s' % urllib.urlencode(query_params))  # TODO this redirect is too fast, still shows
             else:
                 subject = self.request.get('subject')
                 content = self.request.get('content')

@@ -3,7 +3,7 @@
 {% block content %}
     {% for p in posts %}
         <div class = "post">
-            <h4>{{p.subject}}</h4>
+            <h4><a href="/{{p.key().id()}}">{{p.subject}}</a></h4>
             <hr>
             <p>{{p.content}}</p>
             <br>

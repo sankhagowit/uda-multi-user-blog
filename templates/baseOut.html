@@ -22,6 +22,7 @@
             <aside class="col-sm-3">
                 {% if user %}
                 <h3>Welcome {{user.userName}}</h3>
+                <h4 class="error">{{message}}</h4>
                 <form action="/post">
                     <input type="submit" value = "New Post">
                 </form>

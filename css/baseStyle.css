@@ -28,3 +28,7 @@ em.author {
 i.date {
     color: #999
 }
+
+h4 a {
+    color: black;
+}
