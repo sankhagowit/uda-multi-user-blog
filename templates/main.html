@@ -2,9 +2,15 @@
 
 {% block content %}
     {% for p in posts %}
-        <h4>{{p.subject}}</h4>
-        <hr>
-        <p>{{p.content}}</p>
+        <div class = "post">
+            <h4>{{p.subject}}</h4>
+            <hr>
+            <p>{{p.content}}</p>
+            <br>
+            <em class="author">{{p.author}}</em>
+            <i class="date">{{p.last_modified}}</i>
+            <!--<em>Likes: {{p.likes}} Comments: {{p.comments}}</em>-->
+        </div>
         <br><br>
     {% endfor %}
 {% endblock %}

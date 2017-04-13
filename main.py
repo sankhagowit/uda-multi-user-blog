@@ -182,9 +182,41 @@ class BlogPost(Handler):
                         subject = subject, content = content)
 
 class PostPage(Handler):
+    """PostPage displays the view to make a new BlogPost or modify an existing 
+    BlogPost."""
     def get(self, post_id):
+        # Pass Errors from incorrect users attempting to modify or comment a blog post
+        # in the URI get parameters.
+        modifyError = self.request.get('modifyError')
+        commentError = self.request.get('commentError')
         post = model.BlogPost.get_by_id(int(post_id))
-        self.render('singlePost.html', title="Blog Post Detail", post=post)
+        self.render('singlePost.html', title="Blog Post Detail", post=post,
+                    modifyError=modifyError, commentError=commentError)
+
+class ModifyBlog(Handler):
+    def get(self, post_id):
+        """ModifyBlog get call is used to modify an existing Blog Post. Only the user
+        who created the blog post can edit or delete that post
+        The ID of the post is passed in the URI as the BlogPosts ID"""
+        post = model.BlogPost.get_by_id(int(post_id))
+        if post.author != self.user.userName:
+            query_params = {'modifyError': "Sorry - Cannot modify a post you did not author"}
+            self.redirect('/%s?%s' % (post_id, urllib.urlencode(query_params)))
+        else:
+            self.render('blogPost.html', title="Modify Blog Post",
+                        subject=post.subject, content=post.content)
+
+    def post(self, post_id):
+        """ModifyBlog post call used to delete an existing blog post. Only the user
+        who created the blog post can edit or delete that post
+        The ID of the post is passed in the URI as the BlogPosts ID"""
+        post = model.BlogPost.get_by_id(int(post_id))
+        if post.author != self.user.userName:
+            query_params = {'modifyError': "Sorry - Cannot delete a post you did not author"}
+            self.redirect('/%s?%s' % (post_id, urllib.urlencode(query_params)))
+        else:
+            post.delete()
+            self.redirect('/') #TODO this redirect is too fast, still shows
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
@@ -193,5 +225,5 @@ app = webapp2.WSGIApplication([
     ('/post', BlogPost),
     ('/logout', Logout),
     (r'/([0-9]+)', PostPage),
-
+    (r'/modify/([0-9]+)', ModifyBlog)
     ], debug=True)

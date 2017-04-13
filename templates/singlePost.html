@@ -1,28 +1,35 @@
 {% extends "baseOut.html" %}
 
 {% block content %}
-    <h4>{{post.subject}}</h4>
-    <hr>
-    <p>{{post.content}}</p>
-    <br><br>
-
-    <forum action="" method="post">
+    <div class="post">
+        <h4>{{post.subject}}</h4>
+        <hr>
+        <p>{{post.content}}</p>
+        <br>
+        <em class="author">{{post.author}}</em>
+        <i class="date">{{post.last_modified}}</i>
+        <!--<em>{{post.likes}}</em>-->
+    </div>
+    <br>
+    <form action="" method="post">
         <input type="submit" value="Like">
-    </forum>
+    </form>
 
-    <forum action="" method="get">
+    <form action="" method="get">
         <input type="submit" value="Comment">
-    </forum>
+    </form>
+    <div class="error">{{commentError}}</div>
+    <br>
 
-    <br><br>
-
-    <forum>
+    <form action="/modify/{{post.key().id()}}" method="GET">
         <input type="submit" value="Edit">
-    </forum>
+    </form>
 
-    <forum action="" method="Post">
+    <form action="/modify/{{post.key().id()}}" method="Post">
         <input type="submit" value="Delete">
-    </forum>
+    </form>
+    <div class="error">{{modifyError}}</div>
     <br><br>
+
     comments go down here
 {% endblock %}
