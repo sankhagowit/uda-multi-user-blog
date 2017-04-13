@@ -165,7 +165,6 @@ class BlogPost(Handler):
             self.redirect('/signup?'+urllib.urlencode(query_params))
 
     def post(self):
-        self.write('BlogPost Post method called')
         subject = self.request.get('subject')
         content = self.request.get('content')
 
@@ -205,29 +204,32 @@ class ModifyBlog(Handler):
             self.render('blogPost.html', title="Modify Blog Post",
                         subject=post.subject, content=post.content, id=post_id)
 
-    def delete(self, post_id):
-        """ModifyBlog post call used to delete an existing blog post. Only the user
-        who created the blog post can edit or delete that post
-        The ID of the post is passed in the URI as the BlogPosts ID"""
-        post = model.BlogPost.get_by_id(int(post_id))
-        if post.author != self.user.userName:
-            query_params = {'modifyError': "Sorry - Cannot delete a post you did not author"}
-            self.redirect('/%s?%s' % (post_id, urllib.urlencode(query_params)))
-        else:
-            post.delete()
-            self.redirect('/') #TODO this redirect is too fast, still shows
-
     def post(self, post_id):
         """ModifyBlog post call used to delete an existing blog post. Only the user
         who created the blog post can edit or delete that post
         The ID of the post is passed in the URI as the BlogPosts ID"""
+        delete = self.request.get('Delete')
         post = model.BlogPost.get_by_id(int(post_id))
         if post.author != self.user.userName:
             query_params = {'modifyError': "Sorry - Cannot delete a post you did not author"}
             self.redirect('/%s?%s' % (post_id, urllib.urlencode(query_params)))
         else:
-            post.delete()
-            self.redirect('/') #TODO this redirect is too fast, still shows
+            if delete:
+                post.delete()
+                self.redirect('/')  # TODO this redirect is too fast, still shows
+            else:
+                subject = self.request.get('subject')
+                content = self.request.get('content')
+                if subject and content:
+                    post.subject = subject
+                    post.content = content
+                    post.put()
+                    self.redirect('/%s' % post_id)
+                else:
+                    error = "Blog Post must have a subject and content"
+                    self.render('blogPost.html', title="Modify Blog Post", postError=error,
+                                subject=subject, content=content)
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),

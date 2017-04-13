@@ -21,12 +21,12 @@
     <div class="error">{{commentError}}</div>
     <br>
 
-    <form action="/modify/{{post.key().id()}}" method="GET">
+    <form action="/modify/{{post.key().id()}}" method="get">
         <input type="submit" value="Edit">
     </form>
 
-    <form action="/modify/{{post.key().id()}}" method="Post">
-        <input type="submit" value="Delete">
+    <form action="/modify/{{post.key().id()}}" method="post">
+        <input type="submit" name="Delete" value="Delete">
     </form>
     <div class="error">{{modifyError}}</div>
     <br><br>
