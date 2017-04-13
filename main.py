@@ -159,7 +159,6 @@ class Logout(Handler):
 class BlogPost(Handler):
     def get(self):
         if self.user:
-
             self.render('blogPost.html', title="New Blog Post")
         else:
             query_params = {'loginError': 'Must be logged in to make a blog post'}
@@ -204,7 +203,19 @@ class ModifyBlog(Handler):
             self.redirect('/%s?%s' % (post_id, urllib.urlencode(query_params)))
         else:
             self.render('blogPost.html', title="Modify Blog Post",
-                        subject=post.subject, content=post.content)
+                        subject=post.subject, content=post.content, id=post_id)
+
+    def delete(self, post_id):
+        """ModifyBlog post call used to delete an existing blog post. Only the user
+        who created the blog post can edit or delete that post
+        The ID of the post is passed in the URI as the BlogPosts ID"""
+        post = model.BlogPost.get_by_id(int(post_id))
+        if post.author != self.user.userName:
+            query_params = {'modifyError': "Sorry - Cannot delete a post you did not author"}
+            self.redirect('/%s?%s' % (post_id, urllib.urlencode(query_params)))
+        else:
+            post.delete()
+            self.redirect('/') #TODO this redirect is too fast, still shows
 
     def post(self, post_id):
         """ModifyBlog post call used to delete an existing blog post. Only the user

@@ -14,4 +14,10 @@
     <div class="error">{{postError}}</div>
     <input type="submit">
 </form>
+
+{% if id %}
+<form action="/{{id}}">
+    <input type="submit" value="Cancel">
+</form>
+{% endif %}
 {% endblock %}
