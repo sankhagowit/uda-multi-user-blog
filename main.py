@@ -149,7 +149,6 @@ class Login(Handler):
             self.redirect('/')
         else:
             query_params = {'loginError': 'Invalid Username or Password'}
-            # TODO find way to just rerender the current URL with this error message?
             self.redirect('/signup?'+urllib.urlencode(query_params))
 
 class Logout(Handler):
@@ -160,6 +159,7 @@ class Logout(Handler):
 class BlogPost(Handler):
     def get(self):
         if self.user:
+
             self.render('blogPost.html', title="New Blog Post")
         else:
             query_params = {'loginError': 'Must be logged in to make a blog post'}
@@ -171,22 +171,26 @@ class BlogPost(Handler):
         content = self.request.get('content')
 
         if subject and content:
-            post = model.BlogPost(parent = model.blog_key(),
-                                  subject = subject,
-                                  content = content)
-            post.put()
-            self.redirect('/')
-            # self.redirect('/blog/%s' % str(p.key().id()))
-            # They got a separate handler for this
+            post = model.BlogPost(subject = subject,
+                                  content = content,
+                                  author = self.user.userName)
+            postKey = post.put()
+            self.redirect('/%s' % str(postKey.id()))
         else:
             error = "Please enter a Subject and Content for the Blog Post"
             self.render('blogPost.html', title="New Blog Post", postError=error,
                         subject = subject, content = content)
+
+class PostPage(Handler):
+    def get(self, post_id):
+        post = model.BlogPost.get_by_id(int(post_id))
+        self.render('singlePost.html', title="Success!", post=post)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
     ('/signup', SignUp),
     ('/login', Login),
     ('/post', BlogPost),
-    ('/logout', Logout)
+    ('/logout', Logout),
+    (r'/([0-9]+)', PostPage)
     ], debug=True)
