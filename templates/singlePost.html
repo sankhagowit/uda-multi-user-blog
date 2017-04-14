@@ -1,6 +1,7 @@
 {% extends "baseOut.html" %}
 
 {% block content %}
+<!--display the blog post-->
     <div class="post">
         <h4>{{post.subject}}</h4>
         <hr>
@@ -17,6 +18,7 @@
         {% endif %}
     </div>
     <br>
+<!--show like and comment buttons-->
     <form action="/{{post.key().id()}}" method="post">
         <input type="submit" value="Like">
     </form>
@@ -26,7 +28,7 @@
     </form>
     <div class="error">{{commentError}}</div>
     <br>
-
+<!--If the user is the author of the post, show the edit and delete buttons-->
     {% if user %}{% if user.userName == post.author%}
     <form action="/modify/{{post.key().id()}}" method="get">
         <input type="submit" value="Edit">
@@ -38,18 +40,47 @@
     <div class="error">{{modifyError}}</div>
     <br><br>
     {% endif %}{% endif %}
-
+<!--If we have clicked on the comment button display the html to add a comment-->
     {% if commentActive %}
-        Comments are active
+    <div>Add Comment</div>
+    {% if modifyComment %}
+<!--if we are modifying instead of adding a comment, submit button calls different action-->
+    <form action="/modifycomment/{{modifyComment}}" method="post">
+    {% else %}
     <form action="/comment/{{post.key().id()}}" method="post">
-
-        <input type="submit" value="Submit Comment">
+    {% endif %}
+    <label for="">
+        <textarea name="commentContent" id="">{{commentContent}}</textarea>
+    </label>
+    <div class="error">{{commentPostError}}</div>
+    <input type="submit" value="Submit Comment">
     </form>
+
     <form action="/{{post.key().id()}}" method="get">
         <input type="submit" value="Cancel Comment">
     </form>
     {% endif %}
+    <br>
+<!--display comments... comments is always a Gql object...not sure how to change-->
+    {% if comments %}
+    <div class="post">
+        {% for comment in comments %}
+            <p>{{comment.content}}</p>
+            <em class="author">{{comment.author}}</em>
+            <i class="date">{{comment.last_modified}}</i>
+            {% if user %}{% if user.userName == comment.author%}
+                <form action="/modifycomment/{{comment.key().id()}}" method="get">
+                    <input type="submit" value="Edit">
+                </form>
 
+                <form action="/modifycomment/{{comment.key().id()}}" method="post">
+                    <input type="submit" name="delete" value="Delete">
+                </form>
+                <div class="error">{{modifyError}}</div>
+            {% endif %}{% endif %}
 
-    comments go down here
+            <hr>
+        {% endfor %}
+    </div>
+    {% endif %}
 {% endblock %}
