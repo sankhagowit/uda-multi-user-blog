@@ -240,17 +240,22 @@ class ModifyBlog(Handler):
         the user who created the blog post can edit or delete that post
         The ID of the post is passed in the URI after /modify/"""
         post = model.BlogPost.exists(post_id)
-        if post:
-            if post.author != self.user.userName: # Cant modify someone elses post
-                query_params = {'modifyError': "Sorry - Cannot modify a post you did not author"}
-                self.redirect('/%s?%s' % (post_id, urllib.urlencode(query_params)))
+        if self.user:
+            if post:
+                if post.author != self.user.userName: # Cant modify someone elses post
+                    query_params = {'modifyError': "Sorry - Cannot modify a post you did not author"}
+                    self.redirect('/%s?%s' % (post_id, urllib.urlencode(query_params)))
+                else:
+                    # display blogPost page with previous content for modification
+                    self.render('blogPost.html', title="Modify Blog Post",
+                                subject=post.subject, content=post.content, id=post_id)
             else:
-                # display blogPost page with previous content for modification
-                self.render('blogPost.html', title="Modify Blog Post",
-                            subject=post.subject, content=post.content, id=post_id)
+                query_params = {'message': "That blog post does not exist"}
+                self.redirect('/?%s' % (urllib.urlencode(query_params)))
         else:
-            query_params = {'message': "That blog post does not exist"}
-            self.redirect('/?%s' % (urllib.urlencode(query_params)))
+            query_params = {'loginError': "You must be signed in to delete or modify a blog post"}
+            self.redirect('/signup?%s' % (urllib.urlencode(query_params)))
+
 
     def post(self, post_id):
         """ModifyBlog post call used to delete an existing blog post or push
@@ -341,17 +346,27 @@ class ModifyComment(Handler):
     contains logic to display the edit and delete buttons only on comments the
     signed in user made."""
     def get(self, comment_id):
-        comment = model.Comment.exists(comment_id)
-        post = model.BlogPost.exists(comment.blogPost)
-        if comment:
-            self.render('singlePost.html', title="Modify Comment", post=post,
-                        commentActive=True, commentContent=comment.content,
-                        modifyComment=comment_id)
-            # modifyComment flag changes the action of the submit form to ModifyComment
-            # post method opposed to CommentBlog post method
+        if self.user:
+            comment = model.Comment.exists(comment_id)
+            if comment:
+                if comment.author == self.user.userName:
+                    post = model.BlogPost.exists(comment.blogPost)
+                    self.render('singlePost.html', title="Modify Comment", post=post,
+                                commentActive=True, commentContent=comment.content,
+                                modifyComment=comment_id)
+                    # modifyComment flag changes the action of the submit form to ModifyComment
+                    # post method opposed to CommentBlog post method
+                else:
+                    query_params = {
+                        'commentError': "Cannot update comment you did not create"}
+                    self.redirect(
+                        '/%s?%s' % (str(comment.blogPost), urllib.urlencode(query_params)))
+            else:
+                query_params = {'message': "Cannot retrieve comment, it does not exist"}
+                self.redirect('/?%s' % (urllib.urlencode(query_params)))
         else:
-            query_params = {'message': "Cannot retrieve comment, it does not exist"}
-            self.redirect('/?%s' % (urllib.urlencode(query_params)))
+            query_params = {'loginError': "You must be signed in to delete or modify a comment post"}
+            self.redirect('/signup?%s' % (urllib.urlencode(query_params)))
 
     def post(self, comment_id):
         # Post method handles individual comment deletion or pushes updated comment
@@ -359,14 +374,14 @@ class ModifyComment(Handler):
         delete = self.request.get('delete') # This is the delete flag
         comment = model.Comment.get_by_id(int(comment_id))
         if comment:
-            post = model.BlogPost.get_by_id(comment.blogPost)
-            # don't need to check post - if the comment exists, then the
-            # comment.blogPost attribute will be live - if it is deleted the
-            # comment is also deleted
             blogID = str(comment.blogPost)  # Save blogID for redirect at end
             if self.user:
                 if self.user.userName == comment.author:
                     if delete: # Delete the comment
+                        post = model.BlogPost.get_by_id(comment.blogPost)
+                        # don't need to check post - if the comment exists, then the
+                        # comment.blogPost attribute will be live - if it is deleted the
+                        # comment is also deleted
                         comment.delete()
                         post.comments -= 1
                         post.put()
