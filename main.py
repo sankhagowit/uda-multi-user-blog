@@ -76,18 +76,15 @@ class Handler(webapp2.RequestHandler):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         user_id = self.read_cookie('user_id')
         self.user = user_id and model.User.by_id(int(user_id))
+        # Check database for posts at every request to render on aside list
         posts = model.BlogPost.all().order('-created')
         if posts:
-            self.posts = posts
+            self.posts = posts # Now available in all views
 
 
 class MainHandler(Handler):
     def get(self):
         self.render("main.html", title="Multi-User Blog")
-
-    # Post method for debug - nothing to really post here.
-    def post(self):
-        self.write('MainHandler Post Method Called')
 
 
 class SignUp(Handler):
@@ -102,13 +99,14 @@ class SignUp(Handler):
                     loginError=loginError)
 
     def post(self):
+        # Grab sign up parameters
         self.email = self.request.get('email')
         self.username = self.request.get('username')
         self.password = self.request.get('password')
         self.passwordCheck = self.request.get('passwordCheck')
 
         reg_params = dict(username = self.username, email = self.email)
-        # run login info through regex validation, error handling for failures
+        # run signin info through regex validation, error handling for failures
         if not user_accounts.valid_email(self.email):
             reg_params['emailError'] = "Not a valid email address"
 
@@ -163,7 +161,7 @@ class Logout(Handler):
 
 class BlogPost(Handler):
     """get and post methods to display form to create new blog post and push
-    new blog post after error checking to the datastore"""
+    new blog post after error checking to the data store"""
     def get(self):
         # render page for new blog post
         if self.user:
@@ -191,7 +189,9 @@ class BlogPost(Handler):
 
 class PostPage(Handler):
     """PostPage displays a single blog post at a time with the comments. From 
-    this page a user can like a post or add a comment"""
+    this page a user can like a post or add a comment
+    heavily using the get call here via redirects on other handlers and passing
+    the error messages through get parameters called modifyError and commentError"""
     def get(self, post_id):
         # Pass Errors from incorrect users attempting to modify or comment
         # a blog post in the URI get parameters.
@@ -209,10 +209,10 @@ class PostPage(Handler):
         # of likes a blogpost has. The likes are stored as a StringListProperty
         # of the users who have liked the blogpost.
         post = model.BlogPost.get_by_id(int(post_id))
-        if self.user:
-            if post.author != self.user.userName:
+        if self.user: # must be logged in to use the like button
+            if post.author != self.user.userName: # Cant like own post
                 if not self.user.userName in post.likes:
-                    post.addLike(self.user.userName)
+                    post.addLike(self.user.userName) # add user to list
                     query_params = {'commentError': ""}
                 else:
                     query_params = {'commentError': "You've already liked the post! Cannot like it again!"}
@@ -227,27 +227,29 @@ class ModifyBlog(Handler):
     def get(self, post_id):
         """ModifyBlog get call is used to modify an existing Blog Post. Only 
         the user who created the blog post can edit or delete that post
-        The ID of the post is passed in the URI as the BlogPosts ID"""
+        The ID of the post is passed in the URI after /modify/"""
         post = model.BlogPost.get_by_id(int(post_id))
-        if post.author != self.user.userName:
+        if post.author != self.user.userName: # Cant modify someone elses post
             query_params = {'modifyError': "Sorry - Cannot modify a post you did not author"}
             self.redirect('/%s?%s' % (post_id, urllib.urlencode(query_params)))
         else:
+            # display blogPost page with previous content for modification
             self.render('blogPost.html', title="Modify Blog Post",
                         subject=post.subject, content=post.content, id=post_id)
 
     def post(self, post_id):
-        """ModifyBlog post call used to delete an existing blog post. Only the user
+        """ModifyBlog post call used to delete an existing blog post or push
+        updated blog content to an existing blog post. Only the user
         who created the blog post can edit or delete that post
         The ID of the post is passed in the URI as the BlogPosts ID"""
-        delete = self.request.get('Delete')
+        delete = self.request.get('Delete') # the post flag if we are deleting
         post = model.BlogPost.get_by_id(int(post_id))
         if post.author != self.user.userName:
             query_params = {'modifyError': "Sorry - Cannot delete a post you did not author"}
             self.redirect('/%s?%s' % (post_id, urllib.urlencode(query_params)))
         else:
             if delete:
-                post.delete()
+                post.delete() #delete the blog post and all associated comments
                 comments = model.Comment.get_comments_by_blogID(post_id)
                 for comment in comments:
                     comment.delete()
@@ -255,6 +257,7 @@ class ModifyBlog(Handler):
                                            "Page may need to be refreshed to reflect changes"}
                 self.redirect('/?%s' % urllib.urlencode(query_params))
             else:
+                # Save the blog updates.
                 subject = self.request.get('subject')
                 content = self.request.get('content')
                 if subject and content:
@@ -263,14 +266,16 @@ class ModifyBlog(Handler):
                     post.put()
                     self.redirect('/%s' % post_id)
                 else:
+                    # Error handling for updating blog post.
                     error = "Blog Post must have a subject and content"
                     self.render('blogPost.html', title="Modify Blog Post", postError=error,
                                 subject=subject, content=content)
 
 class CommentBlog(Handler):
     """Methods to add and review comments.
-    Would be much easier if it was its own page."""
+    Would be much easier if it was its own page..."""
     def get(self, post_id):
+        # Get method activates tempate to display comment box
         post = model.BlogPost.get_by_id(int(post_id))
         if self.user:
             self.render('singlePost.html', title="Add Comment", commentActive=True, post=post)
@@ -279,33 +284,47 @@ class CommentBlog(Handler):
             self.redirect('/%s?%s' % (post_id, urllib.urlencode(query_params)))
 
     def post(self, post_id):
+        # Post method pushes comment content to data store
         commentContent = self.request.get("commentContent")
+        post = model.BlogPost.get_by_id(int(post_id))
         if commentContent:
             comment = model.Comment(blogPost= int(post_id),
                                     content= commentContent,
                                     author = self.user.userName)
             comment.put()
-            self.redirect('/%s' % post_id)
+            post.comments += 1
+            post.put()
+            self.redirect('/%s' % post_id) #reload page with comment
         else:
-            post = model.BlogPost.get_by_id(int(post_id))
             commentError = "Comment must have content in order to submit"
             self.render('singlePost.html', title="Add Comment",
                         commentActive=True, post=post, commentError=commentError)
 
 class ModifyComment(Handler):
+    """ModifyComment class used to modify existing comments. Jinja2 html template
+    contains logic to display the edit and delete buttons only on comments the
+    signed in user made."""
     def get(self, comment_id):
         comment = model.Comment.get_by_id(int(comment_id))
         post = model.BlogPost.get_by_id(comment.blogPost)
         self.render('singlePost.html', title="Modify Comment", post=post,
                     commentActive=True, commentContent=comment.content,
                     modifyComment=comment_id)
+        # modifyComment flag changes the action of the submit form to ModifyComment
+        # post method opposed to CommentBlog post method
 
     def post(self, comment_id):
-        delete = self.request.get('delete')
+        # Post method handles individual comment deletion or pushes updated comment
+        # content to an existing comment.
+        delete = self.request.get('delete') # This is the delete flag
         comment = model.Comment.get_by_id(int(comment_id))
-        blogID = str(comment.blogPost)
-        if delete:
+        post = model.BlogPost.get_by_id(comment.blogPost)
+        blogID = str(comment.blogPost) # Save blogID for redirect at end
+        # (comment object may be deleted)
+        if delete: # Delete the comment
             comment.delete()
+            post.comments -= 1
+            post.put()
             query_params = {'commentError': "Comment Deleted. May need to refresh page"}
         else:
             commentContent = self.request.get('commentContent')
@@ -316,6 +335,7 @@ class ModifyComment(Handler):
             else:
                 query_params = {'commentError': "Cannot update a comment with no content"}
         self.redirect('/%s?%s' % (blogID, urllib.urlencode(query_params)))
+        # query_params used to pass status of comment deletion throughout posts
 
 
 

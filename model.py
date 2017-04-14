@@ -45,7 +45,9 @@ def blog_key(name = 'default'):
 
 class BlogPost(db.Model):
     """
-    Explain the blog class/entity
+    Entitiy for the main blog posts. Requires a subject which is a searchable
+    StringProperty, content, author, a list of users who have liked it, the number
+    of comments, creation and modification dates
     """
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
@@ -56,9 +58,11 @@ class BlogPost(db.Model):
     last_modified = db.DateTimeProperty(auto_now = True)
 
     def likesLength(self):
+        # Used to display the number of likes in jinja template
         return len(self.likes)
 
     def addLike(self, userName):
+        # Add a username to the likes list, adding a like.
         self.likes.append(userName)
         self.put()
 
@@ -67,8 +71,8 @@ class Comment(db.Model):
     Comment entity used to store comments for a given blog post. Every comment
     contains the ID of the blogpost the comment pertains to.
     
-    Also contains the class method to search through the comment entities and
-    return a l
+    Also contains the class method to search through the comment entities for
+    the comments which match a blogID.
     """
     blogPost = db.IntegerProperty(required = True)
     content = db.TextProperty(required = True)

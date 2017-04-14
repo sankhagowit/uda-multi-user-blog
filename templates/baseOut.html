@@ -20,6 +20,7 @@
                 {% endblock %}
             </main>
             <aside class="col-sm-3">
+                <!--display welcome message if user is signed in -->
                 {% if user %}
                 <h3>Welcome {{user.userName}}</h3>
                 <h4 class="error">{{message}}</h4>
@@ -35,7 +36,7 @@
                     <input type="submit" value="Logout">
                 </form>
                 {% else %}
-
+                <!--display login form if user is not logged in-->
                 <form action="/login" method="post">
                     <label for="">
                         <div>Username</div>
@@ -47,9 +48,7 @@
                         <div>Password</div>
                         <input type="password" name="password">
                     </label>
-                    <!--<label for="">Remember Me-->
-                        <!--<input type="checkbox" name="member">-->
-                    <!--</label>-->
+
                     <div class="error">{{loginError}}</div>
                     <input type="submit">
                     <a href="/signup">Sign Up</a>
@@ -57,6 +56,7 @@
                     <h3><a href="/">Home</a></h3>
                 {% endif %}
                 </form>
+                <!--display list of blog posts-->
                 <h3>Blog Posts</h3>
                 <ul>
                 {% for p in posts %}
