@@ -194,12 +194,14 @@ class PostPage(Handler):
                     modifyError=modifyError, commentError=commentError)
 
     def post(self, post_id):
-        # This post method is used for likes.
+        # This post method is used by the like button to increase the number of likes
+        # a blogpost has. The likes are stored as a StringListProperty of the users who
+        # have liked the blogpost.
         post = model.BlogPost.get_by_id(int(post_id))
         if post.author != self.user.userName:
-            if post.likes != self.user.userName: #TODO this check isn't working.
+            if not self.user.userName in post.likes:
                 post.addLike(self.user.userName)
-                commentError = None
+                commentError = ""
             else:
                 commentError = "You've already liked the post! Cannot like it again!"
         else:

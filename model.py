@@ -64,9 +64,18 @@ class BlogPost(db.Model):
 
 class Comment(db.Model):
     """
-    Explain the comment class/entity
+    Comment entity used to store comments for a given blog post. Every comment
+    contains the ID of the blogpost the comment pertains to.
+    
+    Also contains the class method to search through the comment entities and
+    return a l
     """
     blogPost = db.IntegerProperty(required = True)
     content = db.TextProperty(required = True)
     author =  db.StringProperty(required = True)
     created = db.DateTimeProperty(auto_now_add=True)
+    last_modified = db.DateTimeProperty(auto_now=True)
+
+    @classmethod
+    def get_comments_by_blogID(cls, blogID):
+        return db.GqlQuery("SELECT * FROM Comment WHERE blogPost = %s" % blogID)
