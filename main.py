@@ -306,13 +306,13 @@ class ModifyComment(Handler):
         blogID = str(comment.blogPost)
         if delete:
             comment.delete()
-            query_params = {'commentError': "Comment Deleted"}
+            query_params = {'commentError': "Comment Deleted. May need to refresh page"}
         else:
             commentContent = self.request.get('commentContent')
             if commentContent:
                 comment.content = commentContent
                 comment.put()
-                query_params = {'commentError': "Comment Updated"}
+                query_params = {'commentError': "Comment Updated. May need to refresh page"}
             else:
                 query_params = {'commentError': "Cannot update a comment with no content"}
         self.redirect('/%s?%s' % (blogID, urllib.urlencode(query_params)))
