@@ -66,6 +66,15 @@ class BlogPost(db.Model):
         self.likes.append(userName)
         self.put()
 
+    @classmethod
+    def exists(cls, blogID):
+        # Check if a given blogID exists before performing any operation on it
+        # If it does exist return True otherwise return None
+        post = cls.get_by_id(int(blogID))
+        if post:
+            return post
+
+
 class Comment(db.Model):
     """
     Comment entity used to store comments for a given blog post. Every comment
@@ -83,3 +92,11 @@ class Comment(db.Model):
     @classmethod
     def get_comments_by_blogID(cls, blogID):
         return db.GqlQuery("SELECT * FROM Comment WHERE blogPost = %s" % blogID)
+
+    @classmethod
+    def exists(cls, commentID):
+        # Check if a given commentID exists before performing any operation on
+        # it. If it does exist return True otherwise return None
+        comment = cls.get_by_id(int(commentID))
+        if comment:
+            return comment
