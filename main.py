@@ -198,17 +198,21 @@ class PostPage(Handler):
         # a blogpost has. The likes are stored as a StringListProperty of the users who
         # have liked the blogpost.
         post = model.BlogPost.get_by_id(int(post_id))
-        if post.author != self.user.userName:
-            if not self.user.userName in post.likes:
-                post.addLike(self.user.userName)
-                commentError = ""
+        if self.user:
+            if post.author != self.user.userName:
+                if not self.user.userName in post.likes:
+                    post.addLike(self.user.userName)
+                    commentError = ""
+                else:
+                    commentError = "You've already liked the post! Cannot like it again!"
             else:
-                commentError = "You've already liked the post! Cannot like it again!"
+                commentError = "You cannot like your own post!"
+            self.render('singlePost.html', title="Blog Post Detail", post=post,
+                        commentError=commentError)
         else:
-            commentError = "You cannot like your own post!"
-
-        self.render('singlePost.html', title="Blog Post Detail", post=post,
-                    commentError=commentError)
+            commentError = "You must be signed in to like a post!"
+            self.render('singlePost.html', title="Blog Post Detail", post=post,
+                        commentError=commentError)
 
 class ModifyBlog(Handler):
     def get(self, post_id):
@@ -253,8 +257,16 @@ class ModifyBlog(Handler):
                                 subject=subject, content=content)
 
 class CommentBlog(Handler):
+    """Methods to add and review comments.
+    Would be much easier if it was its own page."""
     def get(self, post_id):
-        self.write('CommentBlog get method called.')
+        post = model.BlogPost.get_by_id(int(post_id))
+        if self.user:
+            self.render('singlePost.html', commentActive=True, post=post)
+        else:
+            commentError = "You must be signed in to comment on a post!"
+            self.render('singlePost.html', title="Blog Post Detail", post=post,
+                        commentError=commentError)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),

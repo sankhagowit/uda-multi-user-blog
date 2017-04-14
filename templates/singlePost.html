@@ -17,16 +17,17 @@
         {% endif %}
     </div>
     <br>
-    <form action="" method="post">
+    <form action="/{{post.key().id()}}" method="post">
         <input type="submit" value="Like">
     </form>
 
-    <form action="" method="get">
+    <form action="/comment/{{post.key().id()}}" method="get">
         <input type="submit" value="Comment">
     </form>
     <div class="error">{{commentError}}</div>
     <br>
 
+    {% if user %}{% if user.userName == post.author%}
     <form action="/modify/{{post.key().id()}}" method="get">
         <input type="submit" value="Edit">
     </form>
@@ -36,6 +37,19 @@
     </form>
     <div class="error">{{modifyError}}</div>
     <br><br>
+    {% endif %}{% endif %}
+
+    {% if commentActive %}
+        Comments are active
+    <form action="/comment/{{post.key().id()}}" method="post">
+
+        <input type="submit" value="Submit Comment">
+    </form>
+    <form action="/{{post.key().id()}}" method="get">
+        <input type="submit" value="Cancel Comment">
+    </form>
+    {% endif %}
+
 
     comments go down here
 {% endblock %}
